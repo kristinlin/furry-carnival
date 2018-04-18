@@ -68,7 +68,7 @@ The file follows the following format:
 
 See the file script for an example of the file format
 
-IMPORTANT MATH NOTE:
+IMPORTANT MATH NOTE:`
 the trig functions int math.h use radian mesure, but us normal
 humans use degrees, so the file will contain degrees for rotations,
 be sure to conver those degrees to radians (M_PI is the constant
@@ -94,6 +94,8 @@ void parse_file ( char * filename,
   else
     f = fopen(filename, "r");
 
+
+  struct stack * rcs= new_stack();
   while ( fgets(line, sizeof(line), f) != NULL ) {
     line[strlen(line)-1]='\0';
     //printf(":%s:\n",line);
@@ -102,19 +104,20 @@ void parse_file ( char * filename,
     double yvals[4];
     double zvals[4];
     struct matrix *tmp;
-    struct matrix *top;
     double r, r1;
     double theta;
     char axis;
     int type;
     int step = 100;
     int step_3d = 10;
-    struct stack * rcs= new_stack();
+    print_stack(rcs);
 
     if ( strncmp(line, "push", strlen(line)) == 0 ) {
+      printf("peeking\n");
+      print_matrix(peek(rcs));
       push(rcs);
     }
-    if ( strncmp(line, "pop", strlen(line)) == 0 ) {
+    else if ( strncmp(line, "pop", strlen(line)) == 0 ) {
       pop(rcs);
     }
     else if ( strncmp(line, "box", strlen(line)) == 0 ) {
@@ -218,9 +221,9 @@ void parse_file ( char * filename,
       /* printf("%lf %lf %lf\n", */
       /* 	xvals[0], yvals[0], zvals[0]); */ 
       tmp = make_scale( xvals[0], yvals[0], zvals[0]);
-      top = peek(rcs);
-      matrix_mult(top,tmp);
-      copy_matrix(tmp, top);
+      
+      matrix_mult(peek(rcs),tmp);
+      copy_matrix(tmp, peek(rcs));
     }//end scale
 
     else if ( strncmp(line, "move", strlen(line)) == 0 ) {
@@ -231,9 +234,8 @@ void parse_file ( char * filename,
       /* printf("%lf %lf %lf\n", */
       /* 	xvals[0], yvals[0], zvals[0]); */ 
       tmp = make_translate( xvals[0], yvals[0], zvals[0]);
-      top = peek(rcs);
-      matrix_mult(top,tmp);
-      copy_matrix(tmp, top);
+      matrix_mult(peek(rcs),tmp);
+      copy_matrix(tmp,peek(rcs));
     }//end translate
 
     else if ( strncmp(line, "rotate", strlen(line)) == 0 ) {
@@ -251,9 +253,9 @@ void parse_file ( char * filename,
       else
         tmp = make_rotZ( theta );
 
-      top = peek(rcs);
-      matrix_mult(top,tmp);
-      copy_matrix(tmp, top);
+      
+      matrix_mult(peek(rcs),tmp);
+      copy_matrix(tmp,peek(rcs));
     }//end rotate
 
     /* else if ( strncmp(line, "clear", strlen(line)) == 0 ) { */
@@ -275,7 +277,7 @@ void parse_file ( char * filename,
 
     else if ( strncmp(line, "display", strlen(line)) == 0 ) {
       //printf("DISPLAY\t%s", line);
-      clear_screen(s);
+      //      clear_screen(s);
       //      draw_lines(edges, s, c);
       //      draw_polygons(polygons, s, c);
       display( s );
@@ -285,9 +287,9 @@ void parse_file ( char * filename,
       fgets(line, sizeof(line), f);
       *strchr(line, '\n') = 0;
       //printf("SAVE\t%s\n", line);
-      clear_screen(s);
-      draw_lines(edges, s, c);
-      draw_polygons(polygons, s, c);
+      //      clear_screen(s);
+      //      draw_lines(edges, s, c);
+      //      draw_polygons(polygons, s, c);
       save_extension(s, line);
     }//end save
   }
